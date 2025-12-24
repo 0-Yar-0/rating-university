@@ -96,7 +96,14 @@ function AppShell({ children }) {
 
 // ============== Main App ==============
 export default function App() {
-  const { loading } = useAuth(); // ← AuthProvider уже обёрнут снаружи
+  const auth = useAuth();
+  console.log('Auth context:', auth); // ← должно быть { user, login, logout, loading }
+  
+  if (!auth) {
+    throw new Error('App is not wrapped in AuthProvider!');
+  }
+
+  const { loading } = auth;
 
   if (loading) {
     return (

@@ -1,3 +1,4 @@
+// src/pages/LoginPage.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { Api } from '../api.js';
@@ -7,8 +8,6 @@ export default function LoginPage() {
     const { user, login } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
-    
-    // Куда перенаправить после входа? (например, если пришли с /input)
     const from = location.state?.from?.pathname || '/input';
 
     const [email, setEmail] = useState('');
@@ -16,12 +15,12 @@ export default function LoginPage() {
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState('');
 
-    // ✅ Правильный способ: редирект при изменении user
+    // ✅ Единственный правильный способ — редирект при изменении user
     useEffect(() => {
         if (user) {
-            navigate(from, { replace: true }); // replace чтобы не было "назад -> login"
+            navigate(from, { replace: true });
         }
-    }, [user, navigate, from]); // зависимость от user — ключевая!
+    }, [user, navigate, from]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -29,8 +28,8 @@ export default function LoginPage() {
         setBusy(true);
         try {
             const resp = await Api.login({ email, password });
-            login(resp); // ← setState → user изменится → сработает useEffect выше
-            // ❌ НЕ НАДО: navigate('/input');
+            login(resp); // ← setState → user изменится → useEffect сработает
+            // ❌ НЕ ПИШИТЕ navigate() здесь!
         } catch (err) {
             setError(err.message || 'Неверный логин или пароль');
         } finally {
