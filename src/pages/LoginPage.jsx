@@ -1,19 +1,27 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { Api } from '../api.js';
 import { useAuth } from '../App.jsx';
 
 export default function LoginPage() {
     const { user, login } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
+    
+    // Куда перенаправить после входа? (например, если пришли с /input)
+    const from = location.state?.from?.pathname || '/input';
+
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState('');
 
-    if (user) {
-        navigate('/input');
-    }
+    // ✅ Правильный способ: редирект при изменении user
+    useEffect(() => {
+        if (user) {
+            navigate(from, { replace: true }); // replace чтобы не было "назад -> login"
+        }
+    }, [user, navigate, from]); // зависимость от user — ключевая!
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -21,10 +29,10 @@ export default function LoginPage() {
         setBusy(true);
         try {
             const resp = await Api.login({ email, password });
-            login(resp);
-            navigate('/input');
+            login(resp); // ← setState → user изменится → сработает useEffect выше
+            // ❌ НЕ НАДО: navigate('/input');
         } catch (err) {
-            setError(err.message || 'Ошибка входа');
+            setError(err.message || 'Неверный логин или пароль');
         } finally {
             setBusy(false);
         }
@@ -41,6 +49,7 @@ export default function LoginPage() {
                         placeholder="Логин (email)"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
+                        autoComplete="email"
                         required
                     />
                     <input
@@ -49,6 +58,7 @@ export default function LoginPage() {
                         placeholder="Пароль"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
+                        autoComplete="current-password"
                         required
                     />
                     {error && <div className="auth-error">{error}</div>}
@@ -66,7 +76,6 @@ export default function LoginPage() {
                             'Войти'
                         )}
                     </button>
-
                 </form>
                 <div className="auth-sub">
                     Нет аккаунта? <Link to="/register">Регистрация</Link>
