@@ -6,8 +6,8 @@
   "scripts": {
     "dev": "vite --open",
     "build": "vite build",
-    "preview": "vite preview --open"
-    "start": "react-scripts start",
+    "preview": "vite preview --open",
+    "start": "react-scripts start"
   },
   "dependencies": {
     "dayjs": "1.11.13",
