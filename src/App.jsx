@@ -125,6 +125,3 @@ export default function App() {
     </AppShell>
   );
 }
-
-// ============== Корневой экспорт ==============
-export { AuthProvider };
