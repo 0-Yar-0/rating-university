@@ -40,17 +40,6 @@ main {
     backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--border);
 }
-.top-bar-left {
-    display: flex;
-    align-items: center;
-    gap: 32px;
-}
-
-.logo-block {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-}
 
 .logo-text {
     font-size: 1.1rem;
@@ -1018,66 +1007,4 @@ main {
 .selected:hover {
     border-color: #d16a00;
     box-shadow: 0 6px 16px rgba(240, 124, 0, 0.3);
-}
-
-.docs-page {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    padding: 48px 24px 80px;
-}
-
-.docs-card {
-    width: min(1280px, 100%);
-    padding: 40px;
-    border-radius: 28px;
-    box-shadow: 0 12px 30px rgba(5, 38, 97, 0.15);
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-}
-
-.docs-hero {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.docs-hero h1 {
-    font-size: 2.25rem;
-    margin-bottom: 8px;
-}
-
-.docs-kicker {
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    font-size: 0.7rem;
-    color: #1d4ed8;
-}
-
-.docs-subtitle {
-    color: #475569;
-    max-width: 540px;
-    line-height: 1.6;
-}
-
-.docs-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    font-size: 0.95rem;
-    color: #1d4ed8;
-}
-
-.docs-note {
-    color: #0f172a;
-    font-weight: 600;
-}
-
-.swagger-wrapper {
-    background: #fff;
-    border: 1px solid var(--border);
-    border-radius: 18px;
-    overflow: hidden;
-    min-height: 640px;
 }

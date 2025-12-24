@@ -4,7 +4,6 @@ import { Api } from './api';
 import InputPage from './pages/InputPage.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import RegisterPage from './pages/RegisterPage.jsx';
-import ApiDocs from './pages/ApiDocs.jsx';
 import ClipLoader from 'react-spinners/ClipLoader';
 
 const AuthContext = createContext(null);
@@ -14,7 +13,6 @@ function AppShell({ children }) {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
 
-                    <Route path="/api-docs" element={<ApiDocs />} />
     const handleLogout = async () => {
         try {
             await logout();
@@ -27,21 +25,16 @@ function AppShell({ children }) {
     return (
         <div className="app-root">
             <header className="top-bar">
-                <div className="top-bar-left">
-                    <div className="logo-block">
-                        <img src='ystu_logo.svg' className="logo-img"></img>
-                        <span className="logo-text">Рейтинг <br /> ЯГТУ</span>
-                    </div>
-                    <nav className="top-nav" aria-label="Основная навигация">
-                        <Link to="/api-docs" className="top-nav-link">
-                            Документация API
-                        </Link>
-                        {user && (
+                <div className="top-bar-left display-flex">
+                    <img src='ystu_logo.svg' className="logo-img"></img>
+                    <span className="logo-text">Рейтинг <br/> ЯГТУ</span>
+                    {/* {user && (
+                        <nav className="top-nav">
                             <Link to="/input" className="top-nav-link">
                                 Ввод параметров
                             </Link>
-                        )}
-                    </nav>
+                        </nav>
+                    )} */}
                 </div>
                 {user && (
                     <div className="top-bar-right">
