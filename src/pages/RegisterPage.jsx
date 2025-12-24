@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { Api } from '../api.js';
-import { useAuth } from '../App.jsx';
+import { useAuth } from '../App.jsx'; // или путь к вашему AuthProvider
 
 export default function RegisterPage() {
-    const { login } = useAuth();
+    const { user, login } = useAuth(); // ← добавили user
     const navigate = useNavigate();
+    const location = useLocation();
+    const from = location.state?.from?.pathname || '/input'; // ← откуда пришли
+
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [pwd1, setPwd1] = useState('');
@@ -14,16 +17,22 @@ export default function RegisterPage() {
     const [error, setError] = useState('');
     const [passError, setPassError] = useState('');
 
+    // ✅ Редирект после регистрации (аналогично LoginPage)
+    useEffect(() => {
+        if (user) {
+            navigate(from, { replace: true });
+        }
+    }, [user, navigate, from]);
+
     const handlePasswordChange = (evt) => {
         const password = evt.target.value;
         setPwd1(password);
         if (password.length < 6) {
-            setPassError('Пароль должен быть не менее 6 символов')
-        } else{
+            setPassError('Пароль должен быть не менее 6 символов');
+        } else {
             setPassError('');
         }
-
-    }
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -32,12 +41,13 @@ export default function RegisterPage() {
             setError('Пароли не совпадают');
             return;
         }
+        if (passError) return; // не отправляем, если пароль неверный
+
         setBusy(true);
         try {
             const resp = await Api.register({ name, email, password: pwd1 });
-            // бэк автоматически логинит, но на всякий случай логиним контекстом
-            login(resp);
-            navigate('/input');
+            login(resp); // ← setUser → useEffect сработает
+            // ❌ НЕ НАДО: navigate('/input');
         } catch (err) {
             setError(err.message || 'Ошибка регистрации');
         } finally {
@@ -73,7 +83,7 @@ export default function RegisterPage() {
                         onChange={handlePasswordChange}
                         required
                     />
-                    {passError && <div className="auth-error"> {passError}</div>}
+                    {passError && <div className="auth-error">{passError}</div>}
                     <input
                         className="auth-input"
                         type="password"
@@ -83,18 +93,24 @@ export default function RegisterPage() {
                         required
                     />
                     {error && <div className="auth-error">{error}</div>}
-                    <button className="primary-btn spinner-btn" type="submit" disabled={busy || passError}>
+                    <button
+                        className="primary-btn spinner-btn"
+                        type="submit"
+                        disabled={busy || passError}
+                    >
                         {busy ? (
                             <>
-                                <span className='spinner-border spinner-border-sm mr-2' role="status" aria-hidden="true"> </span>
-                                Регистрация...
+                                <span
+                                    className="spinner-border spinner-border-sm"
+                                    role="status"
+                                    aria-hidden="true"
+                                ></span>
+                                <span>Регистрация...</span>
                             </>
                         ) : (
                             'Регистрация'
                         )}
-
                     </button>
-
                 </form>
                 <div className="auth-sub">
                     Уже есть аккаунт? <Link to="/login">Войти</Link>
