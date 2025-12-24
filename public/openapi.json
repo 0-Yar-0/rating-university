@@ -1,0 +1,716 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Рейтинг ЯГТУ API",
+    "description": "Документация REST‑контроллеров, используемых фронтендом: регистрация, авторизация, ввод параметров, расчёт и история класса B.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "IT‑команда ЯГТУ",
+      "email": "support@yagu.ru"
+    }
+  },
+  "servers": [
+    {
+      "url": "/",
+      "description": "Относительный путь до API (когда фронтенд проксирует запросы к бэку)"
+    },
+    {
+      "url": "https://rating-api.yagu.ru",
+      "description": "Production (пример, замените на собственный хост)"
+    }
+  ],
+  "paths": {
+    "/api/auth/register": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Зарегистрировать нового пользователя и открыть сессию",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Профиль пользователя",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserProfile"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Выполнить вход и получить профиль",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Профиль пользователя и сессионные cookie",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserProfile"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/logout": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Завершить сессию",
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Сессия удалена"
+          }
+        }
+      }
+    },
+    "/api/auth/me": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Получить профиль текущего пользователя по сессии",
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Профиль пользователя",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserProfile"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/rating/calc-multi": {
+      "post": {
+        "tags": [
+          "rating"
+        ],
+        "summary": "Рассчитать рейтинг по всем классам",
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MultiClassParamsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Результаты расчёта",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalculationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/rating/export-params": {
+      "get": {
+        "tags": [
+          "rating"
+        ],
+        "summary": "Получить последние сохранённые параметры",
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Параметры по классам",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MultiClassParamsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/rating/clear-current": {
+      "post": {
+        "tags": [
+          "rating"
+        ],
+        "summary": "Сбросить текущие введённые параметры"
+      ,
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Кэш вычислений очищен"
+          }
+        }
+      }
+    },
+    "/api/rating/history": {
+      "get": {
+        "tags": [
+          "rating"
+        ],
+        "summary": "Получить историю всех расчётов",
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "История расчётов по классам",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HistoryResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/b/params/last": {
+      "get": {
+        "tags": [
+          "class-b"
+        ],
+        "summary": "Последние параметры класса B",
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Параметры для класса B",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClassParamsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/b/calc/last": {
+      "get": {
+        "tags": [
+          "class-b"
+        ],
+        "summary": "Последний расчёт класса B",
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Последние строки расчёта",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClassResultResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/b/history": {
+      "get": {
+        "tags": [
+          "class-b"
+        ],
+        "summary": "История итераций класса B",
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Список итераций и результатов",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HistoryResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/b/metric-names": {
+      "put": {
+        "tags": [
+          "class-b"
+        ],
+        "summary": "Обновить отображаемые названия метрик",
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MetricNamesUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Подтверждение обновления",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetricNames"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/b/params/iter/{iter}": {
+      "get": {
+        "tags": [
+          "class-b"
+        ],
+        "summary": "Получить параметры класса B для конкретной итерации",
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "iter",
+            "in": "path",
+            "required": true,
+            "description": "Номер итерации",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Параметры для итерации",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClassParamsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "sessionCookie": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "SESSION",
+        "description": "Укажите реальное имя cookie сеанса (например, connect.sid)"
+      }
+    },
+    "schemas": {
+      "RegisterRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "password": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "email",
+          "password"
+        ]
+      },
+      "LoginRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "password": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "UserProfile": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          }
+        },
+        "required": [
+          "name",
+          "email"
+        ]
+      },
+      "ClassParams": {
+        "type": "object",
+        "properties": {
+          "year": {
+            "type": "integer"
+          },
+          "ENa": {
+            "type": "number",
+            "nullable": true
+          },
+          "ENb": {
+            "type": "number",
+            "nullable": true
+          },
+          "ENc": {
+            "type": "number",
+            "nullable": true
+          },
+          "Eb": {
+            "type": "number",
+            "nullable": true
+          },
+          "Ec": {
+            "type": "number",
+            "nullable": true
+          },
+          "beta121": {
+            "type": "number",
+            "nullable": true
+          },
+          "beta122": {
+            "type": "number",
+            "nullable": true
+          },
+          "beta131": {
+            "type": "number",
+            "nullable": true
+          },
+          "beta132": {
+            "type": "number",
+            "nullable": true
+          },
+          "beta211": {
+            "type": "number",
+            "nullable": true
+          },
+          "beta212": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "year"
+        ]
+      },
+      "ClassBlock": {
+        "type": "object",
+        "properties": {
+          "classType": {
+            "type": "string",
+            "description": "A, B или C"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClassParams"
+            }
+          }
+        },
+        "required": [
+          "classType",
+          "data"
+        ]
+      },
+      "MultiClassParamsRequest": {
+        "type": "object",
+        "properties": {
+          "classes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClassBlock"
+            }
+          }
+        },
+        "required": [
+          "classes"
+        ]
+      },
+      "MultiClassParamsResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MultiClassParamsRequest"
+          }
+        ]
+      },
+      "CalcRow": {
+        "type": "object",
+        "properties": {
+          "year": {
+            "type": "integer"
+          },
+          "iteration": {
+            "type": "integer"
+          },
+          "calcResultId": {
+            "type": "string",
+            "nullable": true
+          },
+          "sumB": {
+            "type": "number"
+          },
+          "b11": {
+            "type": "number"
+          },
+          "b12": {
+            "type": "number"
+          },
+          "b13": {
+            "type": "number"
+          },
+          "b21": {
+            "type": "number"
+          },
+          "codeB11": {
+            "type": "string",
+            "nullable": true
+          },
+          "codeB12": {
+            "type": "string",
+            "nullable": true
+          },
+          "codeB13": {
+            "type": "string",
+            "nullable": true
+          },
+          "codeB21": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "year",
+          "iteration",
+          "sumB",
+          "b11",
+          "b12",
+          "b13",
+          "b21"
+        ]
+      },
+      "ClassResult": {
+        "type": "object",
+        "properties": {
+          "classType": {
+            "type": "string"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CalcRow"
+            }
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HistoryItem"
+            }
+          }
+        },
+        "required": [
+          "classType",
+          "data"
+        ]
+      },
+      "CalculationResponse": {
+        "type": "object",
+        "properties": {
+          "classes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClassResult"
+            }
+          }
+        },
+        "required": [
+          "classes"
+        ]
+      },
+      "ClassResultResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CalculationResponse"
+          }
+        ]
+      },
+      "HistoryItem": {
+        "type": "object",
+        "properties": {
+          "iter": {
+            "type": "integer"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CalcRow"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "required": [
+          "iter",
+          "results"
+        ]
+      },
+      "HistoryResponse": {
+        "type": "object",
+        "properties": {
+          "classes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClassResult"
+            }
+          }
+        }
+      },
+      "ClassParamsResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MultiClassParamsResponse"
+          }
+        ]
+      },
+      "MetricNames": {
+        "type": "object",
+        "properties": {
+          "codeB11": {
+            "type": "string"
+          },
+          "codeB12": {
+            "type": "string"
+          },
+          "codeB13": {
+            "type": "string"
+          },
+          "codeB21": {
+            "type": "string"
+          }
+        }
+      },
+      "MetricNamesUpdateRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MetricNames"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "calcResultId": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "calcResultId"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}
