@@ -28,8 +28,25 @@ export default function LoginPage() {
         setBusy(true);
         try {
             const resp = await Api.login({ email, password });
-            // Поддержка разных форм ответов: { user } или прямо объект пользователя
-            login(resp?.user || resp); // ← setState → user изменится → useEffect сработает
+            console.log('LoginPage: /api/auth/login response:', resp);
+
+            // Try to determine user object from response, otherwise fetch /api/auth/me
+            let userObj = resp?.user || resp;
+            if (!userObj) {
+                try {
+                    userObj = await Api.me();
+                    console.log('LoginPage: fetched /api/auth/me after login:', userObj);
+                } catch (errMe) {
+                    console.error('LoginPage: failed to fetch /api/auth/me after login', errMe);
+                }
+            }
+
+            if (userObj) {
+                login(userObj); // ← setState → user изменится → useEffect сработает
+            } else {
+                // If still no user data, show generic error
+                setError('Login succeeded but no user data returned');
+            }
             // ❌ НЕ ПИШИТЕ navigate() здесь!
         } catch (err) {
             setError(err.message || 'Неверный логин или пароль');

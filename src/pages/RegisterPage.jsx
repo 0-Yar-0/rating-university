@@ -46,8 +46,24 @@ export default function RegisterPage() {
         setBusy(true);
         try {
             const resp = await Api.register({ name, email, password: pwd1 });
-            // Поддержка разных форм ответов: { user } или прямо объект пользователя
-            login(resp?.user || resp); // ← setUser → useEffect сработает
+            console.log('RegisterPage: /api/auth/register response:', resp);
+
+            // Try to determine user object from response, otherwise fetch /api/auth/me
+            let userObj = resp?.user || resp;
+            if (!userObj) {
+                try {
+                    userObj = await Api.me();
+                    console.log('RegisterPage: fetched /api/auth/me after register:', userObj);
+                } catch (errMe) {
+                    console.error('RegisterPage: failed to fetch /api/auth/me after register', errMe);
+                }
+            }
+
+            if (userObj) {
+                login(userObj); // ← setUser → useEffect сработает
+            } else {
+                setError('Регистрация успешна, но нет данных пользователя');
+            }
             // ❌ НЕ НАДО: navigate('/input');
         } catch (err) {
             setError(err.message || 'Ошибка регистрации');
