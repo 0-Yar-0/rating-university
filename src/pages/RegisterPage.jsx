@@ -4,7 +4,7 @@ import { Api } from '../api.js';
 import { useAuth } from '../auth.jsx'; // или путь к вашему AuthProvider
 
 export default function RegisterPage() {
-    const { user, login } = useAuth(); // ← добавили user
+    const { user, login, refresh } = useAuth(); // ← добавили user
     const navigate = useNavigate();
     const location = useLocation();
     const from = location.state?.from?.pathname || '/input'; // ← откуда пришли
@@ -16,6 +16,23 @@ export default function RegisterPage() {
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState('');
     const [passError, setPassError] = useState('');
+    const [retrying, setRetrying] = useState(false);
+
+    const handleRetry = async () => {
+        setError('');
+        setRetrying(true);
+        setBusy(true);
+        try {
+            const r = await refresh();
+            console.log('RegisterPage: manual refresh result:', r);
+            if (!r) setError('Повторная попытка не принесла данных пользователя. Проверьте Set-Cookie в ответе /api/auth/register.');
+        } catch (err) {
+            setError('Ошибка при повторной попытке: ' + (err.message || err));
+        } finally {
+            setRetrying(false);
+            setBusy(false);
+        }
+    };
 
     // ✅ Редирект после регистрации (аналогично LoginPage)
     useEffect(() => {
@@ -101,6 +118,13 @@ export default function RegisterPage() {
                         required
                     />
                     {error && <div className="auth-error">{error}</div>}
+                    {error && error.toLowerCase().includes('нет данных пользователя') && (
+                        <div style={{ marginBottom: 8 }}>
+                            <button className="secondary-btn" type="button" onClick={handleRetry} disabled={busy || retrying}>
+                                {retrying ? 'Повторяем...' : 'Повторить получение данных'}
+                            </button>
+                        </div>
+                    )}
                     <button
                         className="primary-btn spinner-btn"
                         type="submit"

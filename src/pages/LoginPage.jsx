@@ -5,7 +5,7 @@ import { Api } from '../api.js';
 import { useAuth } from '../auth.jsx';
 
 export default function LoginPage() {
-    const { user, login } = useAuth();
+    const { user, login, refresh } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
     const from = location.state?.from?.pathname || '/input';
@@ -14,6 +14,23 @@ export default function LoginPage() {
     const [password, setPassword] = useState('');
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState('');
+    const [retrying, setRetrying] = useState(false);
+
+    const handleRetry = async () => {
+        setError('');
+        setRetrying(true);
+        setBusy(true);
+        try {
+            const r = await refresh();
+            console.log('LoginPage: manual refresh result:', r);
+            if (!r) setError('Повторная попытка не принесла данных пользователя. Проверьте Set-Cookie в ответе /api/auth/login.');
+        } catch (err) {
+            setError('Ошибка при повторной попытке: ' + (err.message || err));
+        } finally {
+            setRetrying(false);
+            setBusy(false);
+        }
+    };
 
     // ✅ Единственный правильный способ — редирект при изменении user
     useEffect(() => {
@@ -69,6 +86,13 @@ export default function LoginPage() {
                         required
                     />
                     {error && <div className="auth-error">{error}</div>}
+                    {error && error.toLowerCase().includes('no user') && (
+                        <div style={{ marginBottom: 8 }}>
+                            <button className="secondary-btn" type="button" onClick={handleRetry} disabled={busy || retrying}>
+                                {retrying ? 'Повторяем...' : 'Повторить получение данных'}
+                            </button>
+                        </div>
+                    )}
                     <button
                         className="primary-btn spinner-btn"
                         type="submit"
