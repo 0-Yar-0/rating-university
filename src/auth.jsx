@@ -16,7 +16,8 @@ export const AuthProvider = ({ children }) => {
     const init = async () => {
       try {
         const me = await Api.me();
-        setUser(me);
+        // Support both `{ user }` and direct user object responses from API
+        setUser(me?.user || me);
       } catch {
         setUser(null);
       } finally {
@@ -26,7 +27,12 @@ export const AuthProvider = ({ children }) => {
     init();
   }, []);
 
-  const login = (userData) => setUser(userData);
+  const login = (userData) => {
+    // Normalize payload and help debugging
+    console.log('Auth.login called with:', userData);
+    setUser(userData?.user || userData);
+  };
+
   const logout = async () => {
     await Api.logout().catch(() => {});
     setUser(null);
