@@ -12,6 +12,26 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    const init = async () => {
+      try {
+        // Prevent indefinite hanging — race Api.me with a timeout
+        const me = await Promise.race([
+          Api.me(),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('me timeout')), 5000)),
+        ]);
+        // Support both `{ user }` and direct user object responses from API
+        setUser(me?.user || me);
+      } catch (err) {
+        console.warn('Auth.init failed or timed out:', err);
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+    init();
+  }, []);
+
   // Helper to fetch /api/auth/me with retries — useful when server sets cookie but
   // doesn't return user body immediately after login/register.
   const refresh = async (attempts = 6, delay = 200) => {
