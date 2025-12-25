@@ -1,5 +1,5 @@
 import React, { useEffect, useState, createContext, useContext } from 'react';
-import { Routes, Route, Navigate, useNavigate, Link } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate, Link, NavLink } from 'react-router-dom';
 import { Api } from './api';
 import InputPage from './pages/InputPage.jsx';
 import LoginPage from './pages/LoginPage.jsx';
@@ -28,13 +28,17 @@ function AppShell({ children }) {
                 <div className="top-bar-left display-flex">
                     <img src='ystu_logo.svg' className="logo-img"></img>
                     <span className="logo-text">Рейтинг <br/> ЯГТУ</span>
-                    {/* {user && (
-                        <nav className="top-nav">
-                            <Link to="/input" className="top-nav-link">
-                                Ввод параметров
-                            </Link>
-                        </nav>
-                    )} */}
+                    <nav className="top-nav">
+                        <NavLink to="/input" className={({isActive}) => isActive ? 'top-nav-link active' : 'top-nav-link'}>
+                            Ввод параметров
+                        </NavLink>
+                        <NavLink to="/login" className={({isActive}) => isActive ? 'top-nav-link active' : 'top-nav-link'}>
+                            Вход
+                        </NavLink>
+                        <NavLink to="/register" className={({isActive}) => isActive ? 'top-nav-link active' : 'top-nav-link'}>
+                            Регистрация
+                        </NavLink>
+                    </nav>
                 </div>
                 {user && (
                     <div className="top-bar-right">
