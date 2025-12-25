@@ -30,24 +30,14 @@ export default function LoginPage() {
             const resp = await Api.login({ email, password });
             console.log('LoginPage: /api/auth/login response:', resp);
 
-            // Try to determine user object from response, otherwise fetch /api/auth/me
-            let userObj = resp?.user || resp;
-            if (!userObj) {
-                try {
-                    userObj = await Api.me();
-                    console.log('LoginPage: fetched /api/auth/me after login:', userObj);
-                } catch (errMe) {
-                    console.error('LoginPage: failed to fetch /api/auth/me after login', errMe);
-                }
-            }
+            // Pass response into auth.login which now attempts to refresh /api/auth/me if needed
+            const resultUser = await login(resp);
+            console.log('LoginPage: auth.login returned:', resultUser);
 
-            if (userObj) {
-                login(userObj); // ← setState → user изменится → useEffect сработает
-            } else {
-                // If still no user data, show generic error
+            if (!resultUser) {
                 setError('Login succeeded but no user data returned');
             }
-            // ❌ НЕ ПИШИТЕ navigate() здесь!
+            // ❌ НЕ ПИШИТЕ navigate() здесь! (редирект произойдёт при изменении user через useEffect)
         } catch (err) {
             setError(err.message || 'Неверный логин или пароль');
         } finally {

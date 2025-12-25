@@ -12,25 +12,39 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const init = async () => {
+  // Helper to fetch /api/auth/me with retries — useful when server sets cookie but
+  // doesn't return user body immediately after login/register.
+  const refresh = async (attempts = 6, delay = 200) => {
+    for (let i = 0; i < attempts; i++) {
       try {
         const me = await Api.me();
-        // Support both `{ user }` and direct user object responses from API
-        setUser(me?.user || me);
-      } catch {
-        setUser(null);
-      } finally {
-        setLoading(false);
+        const u = me?.user || me;
+        console.log('Auth.refresh attempt', i + 1, 'result:', u);
+        if (u) {
+          setUser(u);
+          return u;
+        }
+      } catch (err) {
+        console.warn('Auth.refresh error', err);
       }
-    };
-    init();
-  }, []);
+      // wait before retrying
+      await new Promise((r) => setTimeout(r, delay));
+    }
+    return null;
+  };
 
-  const login = (userData) => {
+  const login = async (userData) => {
     // Normalize payload and help debugging
     console.log('Auth.login called with:', userData);
-    setUser(userData?.user || userData);
+    const u = userData?.user || userData;
+    if (u) {
+      setUser(u);
+      return u;
+    }
+
+    // If server didn't return user object, try to refresh (poll /api/auth/me)
+    const refreshed = await refresh();
+    return refreshed;
   };
 
   const logout = async () => {
@@ -39,7 +53,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, logout, loading, refresh }}>
       {children}
     </AuthContext.Provider>
   );
