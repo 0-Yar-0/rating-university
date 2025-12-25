@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { Api } from '../api.js';
-import { useAuth } from '../App.jsx';
+import { useAuth } from '../auth.jsx';
 
 export default function LoginPage() {
     const { user, login } = useAuth();
@@ -28,7 +28,8 @@ export default function LoginPage() {
         setBusy(true);
         try {
             const resp = await Api.login({ email, password });
-            login(resp); // ← setState → user изменится → useEffect сработает
+            // Поддержка разных форм ответов: { user } или прямо объект пользователя
+            login(resp?.user || resp); // ← setState → user изменится → useEffect сработает
             // ❌ НЕ ПИШИТЕ navigate() здесь!
         } catch (err) {
             setError(err.message || 'Неверный логин или пароль');

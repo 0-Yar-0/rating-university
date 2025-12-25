@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { Api } from '../api.js';
-import { useAuth } from '../App.jsx'; // или путь к вашему AuthProvider
+import { useAuth } from '../auth.jsx'; // или путь к вашему AuthProvider
 
 export default function RegisterPage() {
     const { user, login } = useAuth(); // ← добавили user
@@ -46,7 +46,8 @@ export default function RegisterPage() {
         setBusy(true);
         try {
             const resp = await Api.register({ name, email, password: pwd1 });
-            login(resp); // ← setUser → useEffect сработает
+            // Поддержка разных форм ответов: { user } или прямо объект пользователя
+            login(resp?.user || resp); // ← setUser → useEffect сработает
             // ❌ НЕ НАДО: navigate('/input');
         } catch (err) {
             setError(err.message || 'Ошибка регистрации');

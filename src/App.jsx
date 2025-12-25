@@ -1,5 +1,5 @@
 // App.jsx
-import React, { useEffect, useState, createContext, useContext } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Routes,
   Route,
@@ -7,50 +7,15 @@ import {
   useNavigate,
   useLocation,
 } from 'react-router-dom';
+import { AuthProvider, useAuth } from './auth.jsx';
 import { Api } from './api';
 import InputPage from './pages/InputPage.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import RegisterPage from './pages/RegisterPage.jsx';
 import ClipLoader from 'react-spinners/ClipLoader';
 
-// ============== AuthProvider — изолирован от App ==============
-const AuthContext = createContext(null);
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) throw new Error('useAuth must be used within AuthProvider');
-  return context;
-};
-
-export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const init = async () => {
-      try {
-        const me = await Api.me();
-        setUser(me);
-      } catch {
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-    init();
-  }, []);
-
-  const login = (userData) => setUser(userData);
-  const logout = async () => {
-    await Api.logout().catch(() => {});
-    setUser(null);
-  };
-
-  return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
-      {children}
-    </AuthContext.Provider>
-  );
-};
+// Auth logic is moved to src/auth.jsx
+// (imported at the top: `import { AuthProvider, useAuth } from './auth.jsx';`)
 
 // ============== PrivateRoute ==============
 const PrivateRoute = ({ children }) => {
